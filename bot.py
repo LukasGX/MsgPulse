@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 init()
 
 load_dotenv()
-TOKEN = os.getenv["TOKEN"]
+TOKEN = os.getenv("TOKEN")
 
 WORD_COUNTER = {}
 BOTS = {}
