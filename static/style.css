@@ -14,12 +14,24 @@ h2 {
 	margin-bottom: 0.5rem;
 }
 
+.msplit {
+	display: flex;
+	gap: 1rem;
+}
+
 .live-chat {
 	background-color: rgba(0, 0, 0, 0.1);
 	padding: 1rem;
 	border: none;
 	border-radius: 8px;
-	width: 40%;
+	width: 30%;
+	max-height: 90vh !important;
+	overflow-y: auto;
+}
+
+#msgs {
+	/* max-height: 60vh; */
+	overflow-y: auto;
 }
 
 #msgs span.msg {
@@ -36,4 +48,24 @@ h2 {
 	font-weight: bold;
 	color: #d19d00;
 	margin-right: 0.5rem;
+}
+
+.mright {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+	width: 100%;
+}
+
+.most-words {
+	background-color: rgba(0, 0, 0, 0.1);
+	padding: 1rem;
+	border: none;
+	border-radius: 8px;
+	width: 100%;
+}
+
+.ag-theme-quartz .ag-cell {
+	user-select: text !important;
+	-webkit-user-select: text !important;
 }

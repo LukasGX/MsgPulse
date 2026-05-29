@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
@@ -12,11 +13,22 @@ STREAM_REGEX = re.compile(r"^\[SET_STREAM\] .*$")
 
 app.mount("/f", StaticFiles(directory="static"), name="static")
 
+STOP_TASKS = {}
+
 
 @app.get("/")
 async def root():
     return FileResponse("index.html")
 
+async def delayed_stop(bot):
+    # wait 5 min
+    await asyncio.sleep(300)
+
+    # no clients connected in the meantime
+    if len(bot.clients) == 0:
+        await stop_bot(bot.stream)
+
+        STOP_TASKS.pop(bot.stream, None)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -39,7 +51,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 bot = await start_bot(stream_name)
 
-                # websocket registrieren
+                # register ws
                 bot.clients.add(websocket)
 
                 await websocket.send_text(
@@ -55,13 +67,25 @@ async def websocket_endpoint(websocket: WebSocket):
         if bot:
             bot.clients.discard(websocket)
 
-            # optional:
-            # wenn niemand mehr verbunden ist -> bot stoppen
             if len(bot.clients) == 0:
-                await stop_bot(bot.stream)
+                STOP_TASKS[bot.stream] = asyncio.create_task(
+                    delayed_stop(bot)
+                )
 
     except HTTPException as e:
         await websocket.send_text(
             f"Error {e.status_code}: {e.detail}"
         )
         await websocket.close()
+
+@app.get("/all-words/{streamer}")
+async def all_words(streamer: str):
+    bot = await start_bot(streamer)
+    if not bot:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No bot found for streamer: {streamer}"
+        )
+    return {
+        "words": bot.getAllWords()
+    }

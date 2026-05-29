@@ -11,15 +11,33 @@
 			href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
 			rel="stylesheet" />
 
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css" />
+
 		<link rel="stylesheet" href="/f/style.css" />
 	</head>
 	<body>
 		<h1>MsgPulse Twitch Bot</h1>
-		<div class="live-chat">
-			<h2>Live Chat</h2>
-			<div id="msgs"></div>
+		<div class="msplit">
+			<div class="live-chat" id="live-chat">
+				<h2>Live Chat</h2>
+				<div id="msgs"></div>
+			</div>
+			<div class="mright">
+				<div class="most-words">
+					<h2>Meistgenutzte Wörter</h2>
+					<div id="most-words-chart"></div>
+					<div
+						id="all-words-table"
+						class="ag-theme-quartz"
+						style="height: 400px;"></div>
+				</div>
+			</div>
 		</div>
 
+		<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 		<script src="/f/script.js"></script>
 	</body>
 </html>
