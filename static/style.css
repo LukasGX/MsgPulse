@@ -14,6 +14,65 @@ h2 {
 	margin-bottom: 0.5rem;
 }
 
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.modal-content {
+	background-color: #fff;
+	padding: 2rem;
+	border-radius: 8px;
+	position: relative;
+	width: 90%;
+	max-width: 400px;
+}
+
+.close-modal {
+	position: absolute;
+	top: 0.5rem;
+	right: 1rem;
+	background: none;
+	border: none;
+	font-size: 2rem;
+	cursor: pointer;
+}
+
+input {
+	width: 100%;
+	padding: 0.5rem;
+	margin-bottom: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	transition: 225ms ease;
+}
+
+input:hover {
+	border-color: #495bff;
+}
+
+button {
+	background-color: #495bff;
+	color: white;
+	border: none;
+	cursor: pointer;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	transition: 225ms ease;
+}
+
+button:hover {
+	background-color: #1b31fb;
+}
+
 .msplit {
 	display: flex;
 	gap: 1rem;

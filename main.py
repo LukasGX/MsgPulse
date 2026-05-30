@@ -1,4 +1,5 @@
 import asyncio
+import json
 import re
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
@@ -50,12 +51,27 @@ async def websocket_endpoint(websocket: WebSocket):
                 stream_name = data.split(" ", 1)[1]
 
                 bot = await start_bot(stream_name)
+                if not bot:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Stream not found or offline: {stream_name}"
+                    )
+                
+                await websocket.send_text(
+                    json.dumps({
+                        "type": "live_info",
+                        "live_since": bot.live_since.isoformat()
+                    })
+                )
 
                 # register ws
                 bot.clients.add(websocket)
 
                 await websocket.send_text(
-                    f"Connected to stream: {stream_name}"
+                    json.dumps({
+                        "type": "info",
+                        "msg": f"Connected to stream: {stream_name}"
+                    })
                 )
 
             else:

@@ -3,6 +3,7 @@ import json
 import os
 import re
 import aiohttp
+from datetime import datetime
 
 from twitchio.ext import commands
 from colorama import init, Fore
@@ -77,6 +78,7 @@ class ChatBot(commands.Bot):
         self.stream = streamer
         self.clients = set()
         self.most_words = {}
+        self.live_since = datetime.now()
     
     def getAllWords(self):
         sorted_words = sorted(
