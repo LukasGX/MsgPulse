@@ -1,14 +1,21 @@
 import asyncio
 import json
 import re
+import os
+import secrets
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import Depends, FastAPI, Form, Request, WebSocket, WebSocketDisconnect, HTTPException, status
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from bot import start_bot, stop_bot
 
 app = FastAPI()
+
+SESSIONS = set()
+
+APP_USERNAME = os.getenv("APP_USERNAME")
+APP_PASSWORD = os.getenv("APP_PASSWORD")
 
 STREAM_REGEX = re.compile(r"^\[SET_STREAM\] .*$")
 
@@ -16,14 +23,46 @@ app.mount("/f", StaticFiles(directory="static"), name="static")
 
 STOP_TASKS = {}
 
+def get_user(request: Request):
+    token = request.cookies.get("session")
+
+    if not token or token not in SESSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    return token
 
 @app.get("/")
-async def root():
+async def root(user=Depends(get_user)):
     return FileResponse("index.html")
 
+@app.get("/login")
+async def login_page():
+    return FileResponse("login.html")
+
+@app.post("/login")
+async def login(username: str = Form(...), password: str = Form(...)):
+    if username == APP_USERNAME and password == APP_PASSWORD:
+        token = secrets.token_hex(32)
+        SESSIONS.add(token)
+
+        response = RedirectResponse(url="/", status_code=302)
+        response.set_cookie(
+            key="session",
+            value=token,
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+        return response
+
+    return HTMLResponse("Invalid login", status_code=403)
+
 async def delayed_stop(bot):
-    # wait 5 min
-    await asyncio.sleep(300)
+    # wait 15 min
+    await asyncio.sleep(900)
 
     # no clients connected in the meantime
     if len(bot.clients) == 0:
@@ -33,6 +72,12 @@ async def delayed_stop(bot):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    token = websocket.cookies.get("session")
+
+    if not token or token not in SESSIONS:
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
 
     bot = None
@@ -95,7 +140,7 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close()
 
 @app.get("/all-words/{streamer}")
-async def all_words(streamer: str):
+async def all_words(streamer: str, user=Depends(get_user)):
     bot = await start_bot(streamer)
     if not bot:
         raise HTTPException(
@@ -105,3 +150,13 @@ async def all_words(streamer: str):
     return {
         "words": bot.getAllWords()
     }
+
+@app.get("/logout")
+async def logout(request: Request):
+    token = request.cookies.get("session")
+    if token:
+        SESSIONS.discard(token)
+
+    response = RedirectResponse("/login")
+    response.delete_cookie("session")
+    return response

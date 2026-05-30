@@ -31,7 +31,7 @@ function addMsg(timestamp, user, msg) {
 	msgsElement.innerHTML += `
     <span class="msg">
         <span class="timestamp">${timestamp}</span>
-        <span class="user">${user}</span>
+        <span class="user ${user == "zorpixal" ? "highlight" : ""}">${user}</span>
         <span class="content">${msg}</span>
     </span>`;
 
@@ -125,11 +125,15 @@ const grid = agGrid.createGrid(gridDiv, gridOptions);
 openModal(
 	`
 	<h2>Streamer auswählen</h2>
-	<input type="text" id="streamer-input" placeholder="Twitch-Name">
-	<button id="connect-btn">Verbinden</button>
+	<form onsubmit="return false;">
+		<input type="text" id="streamer-input" placeholder="Twitch-Name">
+		<button type="submit" id="connect-btn">Verbinden</button>
+	</form>
 `,
 	false
 );
+
+document.getElementById("streamer-input").focus();
 
 document.getElementById("connect-btn").onclick = () => {
 	const streamer = document.getElementById("streamer-input").value.trim();
